@@ -2,6 +2,9 @@
 #include <Windows.h>
 #include <conio.h>
 #include <stdlib.h>
+#include "encriptacion.h"
+#include "desencript.h"
+#include <string.h>
 //definicion del numero de las flechas
 #define UP 72
 #define DOWN 80
@@ -17,19 +20,24 @@ void esconder_cursor();
 void centrar_texto(int espacios);
 void ejecutar_opcion_menu_principal(int opcion);
 void crear_pin();
+//void print_pin();
 void verificar_pin();
 void iniciar_sesion();
 
-int posOpcion=0, i, salida=0, key=0, pinAsignado=0, size, numeroOpciones=3, opcion;
+int posOpcion=0, i, salida=0, key=0, pinAsignado=0, size, numeroOpciones=3;
 FILE *pinArchivo;
 
 int main(){
-    //funcion para verificar si ya hay un pin generado
-    verificar_pin();
-    //Funcion que imprime las opciones
-    opcion = menu_principal_opciones();
-    //Funcion ejecuta la opcion seleccionada
-    ejecutar_opcion_menu_principal(opcion);
+    int opcion;
+    do{
+        //funcion para verificar si ya hay un pin generado
+        verificar_pin();
+        //Funcion que imprime las opciones
+        opcion = menu_principal_opciones();
+        //Funcion ejecuta la opcion seleccionada
+        ejecutar_opcion_menu_principal(opcion);
+    }
+    while(salida!=1);
     return 0;
 }
 //funcion para cambiar de opcion seleccionada, usando las flechas del teclado
@@ -87,7 +95,7 @@ void centrar_texto(int extensionString){
 void imprimir_menu_principal(int opcionSelec){
     //Cambio de color si la opcion esta seleccionada
     if(pinAsignado == 1){
-        if(opcionSelec == numeroOpciones-3){color(4);} else{color(7);} 
+        if(opcionSelec == 0){color(4);} else{color(7);} 
         centrar_texto(15);
         printf("Iniciar sesi%cn\n", 162);
         //Cambio de color si la opcion esta seleccionada
@@ -110,30 +118,48 @@ void imprimir_menu_principal(int opcionSelec){
     printf("Salir del programa\n");
 }
 void crear_pin(){
-    char pinUsuario[5];
+    char pinUsuario[5], pinEncriptado[100]="", x[30];
+    int charEncriptado;
     system("cls");
-    pinArchivo = fopen("pin.txt", "w+");
+    pinArchivo = fopen("pin.txt", "w");
     color(6);
     printf("Ingresa PIN con el que vas a proteger tus contactos (de 4 digitos): ");
     color(7);
     fflush(stdin);
     gets(pinUsuario);
-    fputs(pinUsuario, pinArchivo);
-    fflush(pinArchivo);
+    //for para encriptar cada caracter 
+    for(i=0; i<4; i++){
+        charEncriptado = encriptar(pinUsuario[i]);
+        sprintf(x, "%d", charEncriptado);
+        strcat(pinEncriptado, x);
+        if(i < 3){
+            strcat(pinEncriptado, " ");
+        }
+    }
+    fputs(pinEncriptado, pinArchivo);
     fclose(pinArchivo);
     printf("\n");
-    centrar_texto(22); printf("PIN Creado con exito!", 130);
+    centrar_texto(22); printf("PIN Creado con exito!\n", 130);
     centrar_texto(54); printf("Pulsa cualquier tecla para regresar al menu principal");
-    //"Regreso" al menu principal
-
-    //funcion para verificar si ya hay un pin generado
-    verificar_pin();
-    //Funcion que imprime las opciones
-    opcion = menu_principal_opciones();
-    //Funcion ejecuta la opcion seleccionada
-    ejecutar_opcion_menu_principal(opcion);
-    
+    getch();
 }
+// void print_pin(){
+//     char pin[100];
+//     int x, charDesencrip;
+//     system("cls");
+//     pinArchivo = fopen("pin.txt", "r");
+//     while( fgets(pin, 100, pinArchivo)!= NULL){
+//         printf("%s", pin);
+//     }
+//     char *ptr = strtok(pin, " "); 
+// 	   while(ptr != NULL){
+//          x = atoi(ptr);
+//          charDesencrip = desencrip(x);
+// 		    ptr = strtok(NULL, " ");
+// 	    }
+//     fclose(pinArchivo);
+//     getch();
+// }
 void verificar_pin(){
     pinArchivo = fopen("pin.txt", "r");
     if (pinArchivo != NULL) {
@@ -151,27 +177,32 @@ void verificar_pin(){
     fclose(pinArchivo);
 }
 void iniciar_sesion(){
-    // system("cls");
-    // pin = fopen("pin.txt", "r");
-    // if (pin != NULL){
-    //     printf("No hay ningun pin asignado\n");
-    // }
-    // else{
-    //     printf("no se puede abrir el archivo\n");
-    // }
+    system("cls");
+    pinArchivo = fopen("pin.txt", "r");
+    
 }
 void ejecutar_opcion_menu_principal(int opcion){
-    if(opcion == 0){
-        if(pinAsignado==1){
-            iniciar_sesion();
-        }
-        else{
+
+    if(pinAsignado == 0){
+        if(opcion == 0){
             crear_pin();
         }
+        else if (opcion == numeroOpciones){
+            salida=1;
+        }
     }
-    else if (opcion == numeroOpciones){
-        exit(0);
+    else{
+        if(opcion == 0){
+            iniciar_sesion();
+        }
+        else if(opcion == numeroOpciones-2){
+            print_pin();
+        }
+        else if (opcion == numeroOpciones){
+            salida=1;
+        }
     }
+    
 }
 
 //funcion para esconger el puntero del cursor (donde se esta escribiendo el texto)
