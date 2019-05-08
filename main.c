@@ -2,9 +2,9 @@
 #include <Windows.h>
 #include <conio.h>
 #include <stdlib.h>
-#include "encriptacion.h"
-#include "desencript.h"
 #include <string.h>
+#include "encrypt.h"
+
 //definicion del numero de las flechas
 #define UP 72
 #define DOWN 80
@@ -44,7 +44,6 @@ int main(){
 int menu_principal_opciones(){
     do{
         system("cls");
-        printf("%d\n", key);
         esconder_cursor();
         titulo();
         imprimir_menu_principal(posOpcion);
@@ -75,15 +74,15 @@ int menu_principal_opciones(){
 //funcion para imprimir el titulo
 void titulo(){
     color(6);
-    centrar_texto(68);
+    centrar_texto(66);
     printf("   __    __        ___   ___    __  _____  _      ___  _____  ___ \n");
-    centrar_texto(68);
+    centrar_texto(66);
     printf("  /__\\/\\ \\ \\      / __\\ /___\\/\\ \\ \\/__   \\/_\\    / __\\/__   \\/___\\\n");
-    centrar_texto(68);
+    centrar_texto(66);
     printf(" /_\\ /  \\/ /____ / /   //  //  \\/ /  / /\\//_\\\\  / /     / /\\//  //\n");
-    centrar_texto(68);
+    centrar_texto(66);
     printf("//__/ /\\  /_____/ /___/ \\_// /\\  /  / / /  _  \\/ /___  / / / \\_// \n");
-    centrar_texto(68);
+    centrar_texto(66);
     printf("\\__/\\_\\ \\/      \\____/\\___/\\_\\ \\/   \\/  \\_/ \\_/\\____/  \\/  \\___/  \n\n\n");
 }
 //funcion que imprime n cantidad de espacios en blanco para correr el texto
@@ -96,51 +95,77 @@ void imprimir_menu_principal(int opcionSelec){
     //Cambio de color si la opcion esta seleccionada
     if(pinAsignado == 1){
         if(opcionSelec == 0){color(4);} else{color(7);} 
-        centrar_texto(15);
+        centrar_texto(14);
         printf("Iniciar sesi%cn\n", 162);
         //Cambio de color si la opcion esta seleccionada
         if(opcionSelec == numeroOpciones-2){color(4);} else{color(7);} 
-        centrar_texto(9);
+        centrar_texto(8);
         printf("Opci%cn 2\n", 162);
         //Cambio de color si la opcion esta seleccionada
         if(opcionSelec == numeroOpciones-1){color(4);} else{color(7);}
-        centrar_texto(9);
+        centrar_texto(8);
         printf("Opci%cn 3\n", 162);
     }
     else{
         if(opcionSelec == 0){color(4);} else{color(7);} 
-        centrar_texto(10);
+        centrar_texto(9);
         printf("Crear PIN\n");
     }
     //Cambio de color si la opcion esta seleccionada
     if(opcionSelec == numeroOpciones){color(4);} else{color(7);}
-    centrar_texto(19);
+    centrar_texto(18);
     printf("Salir del programa\n");
 }
 void crear_pin(){
-    char pinUsuario[5], pinEncriptado[100]="", x[30];
-    int charEncriptado;
+    int i, j, error=0;
+    char pinUsuario[5], pinEncriptado[2000];
     system("cls");
-    pinArchivo = fopen("pin.txt", "w");
-    color(6);
-    printf("Ingresa PIN con el que vas a proteger tus contactos (de 4 digitos): ");
-    color(7);
-    fflush(stdin);
-    gets(pinUsuario);
-    //for para encriptar cada caracter 
-    for(i=0; i<4; i++){
-        charEncriptado = encriptar(pinUsuario[i]);
-        sprintf(x, "%d", charEncriptado);
-        strcat(pinEncriptado, x);
-        if(i < 3){
-            strcat(pinEncriptado, " ");
+    //Do-While para volver a pedir el pin en caso que no cumpla con la extension pedida
+    do{
+        error=0;
+        color(6);
+        printf("\n\n\n\n");
+        centrar_texto(66); printf("Ingresa PIN con el que vas a proteger tus contactos (de 4 digitos):\n");
+        color(7);
+        fflush(stdin);
+        centrar_texto(4); gets(pinUsuario);
+        if(strlen(pinUsuario) < 4 || strlen(pinUsuario) > 4){
+            color(4);
+            printf("\n\n\n\n");
+            centrar_texto(46); printf("El pin debe tener 4 digitos, vuelve a ponerlo!\n\n");
+            color(7);
+            centrar_texto(46); printf("Pulsa cualquier tecla para intentarlo de nuevo");
+            error=1;
+            getch();
         }
+        else{
+            for(i=0; i<4; i++){
+                if(pinUsuario[i] < '0' || pinUsuario[i]>'9'){
+                    color(4);
+                    printf("\n\n\n\n");
+                    centrar_texto(52); printf("El pin debe contener solo numeros, vuelve a ponerlo!\n\n");
+                    color(7);
+                    centrar_texto(46); printf("Pulsa cualquier tecla para intentarlo de nuevo");
+                    error=1;
+                    getch();
+                    break;
+                }
+            }
+        }
+        
+        system("cls");
     }
+    while (error==1);
+    //funcion para encriptar el pin 
+    encrypt(pinUsuario, pinEncriptado);
+    //funcion para poner el pin encriptado en el archivo
+    pinArchivo = fopen("pin.txt", "w");
     fputs(pinEncriptado, pinArchivo);
     fclose(pinArchivo);
-    printf("\n");
-    centrar_texto(22); printf("PIN Creado con exito!\n", 130);
-    centrar_texto(54); printf("Pulsa cualquier tecla para regresar al menu principal");
+
+    printf("\n\n\n\n");
+    centrar_texto(21); printf("PIN Creado con exito!\n");
+    centrar_texto(53); printf("Pulsa cualquier tecla para regresar al menu principal");
     getch();
 }
 // void print_pin(){
@@ -169,6 +194,10 @@ void verificar_pin(){
             pinAsignado=1;
             numeroOpciones=3;
         }
+        else{
+            pinAsignado=0;
+            numeroOpciones=1;
+        }
     }
     else{
         pinAsignado=0;
@@ -196,7 +225,7 @@ void ejecutar_opcion_menu_principal(int opcion){
             iniciar_sesion();
         }
         else if(opcion == numeroOpciones-2){
-            print_pin();
+            //print_pin();
         }
         else if (opcion == numeroOpciones){
             salida=1;
