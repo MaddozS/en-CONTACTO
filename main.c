@@ -226,7 +226,7 @@ int iniciar_sesion(){
         pinPrograma[i] = (char)c;
         i++;
     }
-    pinPrograma[i+1]=='\0';
+    pinPrograma[i]='\0';
     fclose(pinArchivo);
     do{
         fallo=0;

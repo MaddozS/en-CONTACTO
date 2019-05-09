@@ -24,7 +24,10 @@ void encrypt(char *origin, char *destination){
 //@destination: variable donde se almacenara el texto desencriptado
 void decrypt(char *encrypted, char *destination){
     int x, originalChar, i=0;
-    char *ptr = strtok(encrypted, "-"); 
+    char *strTokens;
+    strTokens = malloc((strlen(encrypted)+1)*sizeof(char));
+    strcpy(strTokens, encrypted);
+    char *ptr = strtok(strTokens, "-"); 
 	while(ptr != NULL){
         x = atoi(ptr);
         originalChar = (x/13)+10;
