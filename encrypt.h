@@ -5,7 +5,6 @@
 //Funcion que encripta un string que se le de
 //@origin: texto que se va a encriptar
 //@destination: variable donde se almacenara el texto encriptado
-
 void encrypt(char *origin, char *destination){
     destination[0]='\0';
     int i, iChar, charEncrypted;
@@ -23,7 +22,6 @@ void encrypt(char *origin, char *destination){
 //Funcion que desencripta un string que se le de
 //@encrypted: texto que esta previamente encriptado
 //@destination: variable donde se almacenara el texto desencriptado
-
 void decrypt(char *encrypted, char *destination){
     int x, originalChar, i=0;
     char *ptr = strtok(encrypted, "-"); 
@@ -31,19 +29,17 @@ void decrypt(char *encrypted, char *destination){
         x = atoi(ptr);
         originalChar = (x/13)+10;
         destination[i]= (char)originalChar;
-        printf("%c", destination[i]);
 		ptr = strtok(NULL, "-");
         i++;
 	}
     destination[i+1]='\0';
 }
-//Funcion que dompara un texto dado con uno ya encriptado, para saber si son iguales.
+//Funcion que compara un texto dado con uno ya encriptado, para saber si son iguales.
 //ENTRADA:
 //@encrypted: texto sin encriptar
 //@destination: texto encriptado
 //SALIDA:
 //@status: retorna 1 si los 2 strings comparadaros son iguales, en caso de no serlo, retorna 0
-
 int compare(char *str1, char *strEncrypted){
     char decryptedStr[2048];
     int status;
