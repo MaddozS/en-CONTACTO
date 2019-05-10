@@ -35,7 +35,7 @@ void decrypt(char *encrypted, char *destination){
 		ptr = strtok(NULL, "-");
         i++;
 	}
-    destination[i+1]='\0';
+    destination[i]='\0';
 }
 //Funcion que compara un texto dado con uno ya encriptado, para saber si son iguales.
 //ENTRADA:
