@@ -14,27 +14,32 @@
 //FUNCIONES
 void color(char color);
 void titulo();
-int menu_principal(int opcion);
-void imprimir_menu_principal();
+void imprimir_menu_principal(int opcionSeleccionada);
 void esconder_cursor();
 void centrar_texto(int espacios);
 void ejecutar_opcion_menu_principal(int opcion);
 void crear_pin();
-//void print_pin();
-void verificar_pin();
+void verificar_pin(int statusPin);
+int menu_abc();
+void imprimir_menu_abc(int opcionSeleccionada);
+void ejecutar_opcion_menu_abc(int opcionSeleccionada);
+int verificar_archivo(char *rutaDelArchivo);
 int iniciar_sesion();
+void crear_contacto();
 
 //Variables globales
-int posOpcion=0, i, salida=0, key=0, pinAsignado=0, size, numeroOpciones=3;
-FILE *pinArchivo;
+int salida=0, salidaABC=0, existePin, totalOpcMenuPrin;
 
 //Funcion main
 //Es la que lleva el proceso del todo el programa
-int main(){
-    int opcion;
+int main(int argc, char const *argv[])
+{
+    int opcion, statusPin;
     do{
+        esconder_cursor();
         //Se verifica que ya haya un pin generado
-        verificar_pin();
+        statusPin = verificar_archivo("pin.txt");
+        verificar_pin(statusPin);
         //Se imprimen las opciones del menu principal
         opcion = menu_principal_opciones();
         //Se ejecuta la opcion seleccionada
@@ -43,36 +48,109 @@ int main(){
     while(salida!=1);
     return 0;
 }
-//Funcion que imprime las opciones del menu principal y las itera dependiendo de la tecla que se presione, asi como ejecutar la opcion seleccionada cuando se presione ENTER
-int menu_principal_opciones(){
+void verificar_pin(int statusPin){
+     if(statusPin != 2){
+        totalOpcMenuPrin=1;
+        existePin=0;
+    }
+    else{
+        totalOpcMenuPrin=3;
+        existePin=1;
+    }
+}
+//Funcion que ejecuta la opcion seleccionada en el menu de Altas Bajas y Cambios
+void ejecutar_opcion_menu_abc(int opcionSeleccionada){
+    if(opcionSeleccionada == 0){
+        crear_contacto();
+    }
+    else if(opcionSeleccionada == 4){
+        salidaABC=1;
+    }
+}
+void crear_contacto(){
+
+}
+//Imprime las opciones disponibles dentro del menu de Altas Bajas y Cambios, si la opcion esta seleccionada, se imprimira de un color diferente
+void imprimir_menu_abc(int opcionSeleccionada){
+    if(opcionSeleccionada == 0){color(4);} else{color(7);} 
+    centrar_texto(14);
+    printf("\nAgregar contactos");
+    if(opcionSeleccionada == 1){color(4);} else{color(7);} 
+    centrar_texto(14);
+    printf("\nEditar un contacto");
+    if(opcionSeleccionada == 2){color(4);} else{color(7);} 
+    centrar_texto(14);
+    printf("\nEliminar un contacto");
+    if(opcionSeleccionada == 3){color(4);} else{color(7);} 
+    centrar_texto(14);
+    printf("\nVer todos los contactos");
+    if(opcionSeleccionada == 4){color(4);} else{color(7);} 
+    centrar_texto(14);
+    printf("\nRegresar al menu principal");
+}
+//Funcion que itera, mediante el teclado, la opcion seleccionada en el menu de Altas Bajas y Cambios
+//@SALIDA: Si se aprieta la tecla ENTER, el ciclo se rompe y la funcion devolvera la opcion seleccionada del menu de ABC
+int menu_abc(){
+    int posOpcionABC=0, key=0;
     do{
         system("cls");
-        esconder_cursor();
-        titulo();
-        imprimir_menu_principal(posOpcion);
+        imprimir_menu_abc(posOpcionABC);
         key = getch();
         switch (key){
             case UP:
-                if(posOpcion==0){
-                    posOpcion=numeroOpciones;
+                if(posOpcionABC==0){
+                    posOpcionABC=4;
                 }
                 else{
-                    posOpcion--;
+                    posOpcionABC--;
                 }
                 break;
             case DOWN:
-                if(posOpcion==numeroOpciones){
-                    posOpcion=0;
+                if(posOpcionABC==4){
+                    posOpcionABC=0;
                 }
                 else{
-                    posOpcion++;
+                    posOpcionABC++;
                 }
                 break;
         }
     }
     while(key != ENTER);
+
+    return posOpcionABC;
+}
+
+//Funcion que imprime las opciones del menu principal y las itera dependiendo de la tecla que se presione, asi como ejecutar la opcion seleccionada cuando se presione ENTER
+int menu_principal_opciones(){
+    int posOpcionPrincipal=0, key=0;
    
-    return posOpcion;
+    do{
+        system("cls");
+        titulo();
+        imprimir_menu_principal(posOpcionPrincipal);
+        key = getch();
+        switch (key){
+            case UP:
+                if(posOpcionPrincipal==0){
+                    posOpcionPrincipal=totalOpcMenuPrin;
+                }
+                else{
+                    posOpcionPrincipal--;
+                }
+                break;
+            case DOWN:
+                if(posOpcionPrincipal==totalOpcMenuPrin){
+                    posOpcionPrincipal=0;
+                }
+                else{
+                    posOpcionPrincipal++;
+                }
+                break;
+        }
+    }
+    while(key != ENTER);
+
+    return posOpcionPrincipal;
 }
 //Funcion que imprime el titulo del programa
 void titulo(){
@@ -93,30 +171,29 @@ void centrar_texto(int extensionString){
     int i;
     for(i = 1; i <= 60-(extensionString/2); i++){ printf(" "); }
 }
-
 //Funcion que unicamente imprime las opciones del programa, dependiendo si hay o no hay pin
-void imprimir_menu_principal(int opcionSelec){
+void imprimir_menu_principal(int opcionSeleccionada){
     //Cambio de color si la opcion esta seleccionada
-    if(pinAsignado == 1){
-        if(opcionSelec == 0){color(4);} else{color(7);} 
+    if(existePin == 1){
+        if(opcionSeleccionada == 0){color(4);} else{color(7);} 
         centrar_texto(14);
         printf("Iniciar sesi%cn\n", 162);
         //Cambio de color si la opcion esta seleccionada
-        if(opcionSelec == numeroOpciones-2){color(4);} else{color(7);} 
+        if(opcionSeleccionada == totalOpcMenuPrin-2){color(4);} else{color(7);} 
         centrar_texto(8);
         printf("Opci%cn 2\n", 162);
         //Cambio de color si la opcion esta seleccionada
-        if(opcionSelec == numeroOpciones-1){color(4);} else{color(7);}
+        if(opcionSeleccionada == totalOpcMenuPrin-1){color(4);} else{color(7);}
         centrar_texto(8);
         printf("Opci%cn 3\n", 162);
     }
     else{
-        if(opcionSelec == 0){color(4);} else{color(7);} 
+        if(opcionSeleccionada == 0){color(4);} else{color(7);} 
         centrar_texto(9);
         printf("Crear PIN\n");
     }
     //Cambio de color si la opcion esta seleccionada
-    if(opcionSelec == numeroOpciones){color(4);} else{color(7);}
+    if(opcionSeleccionada == totalOpcMenuPrin){color(4);} else{color(7);}
     centrar_texto(18);
     printf("Salir del programa\n");
 }
@@ -124,6 +201,7 @@ void imprimir_menu_principal(int opcionSelec){
 void crear_pin(){
     int i, j, error=0;
     char pinUsuario[5], pinEncriptado[2000];
+    FILE *pinArchivo;
     system("cls");
     //Do-While para volver a pedir el pin en caso que no cumpla con la extension pedida
     do{
@@ -174,44 +252,38 @@ void crear_pin(){
     centrar_texto(53); printf("Pulsa cualquier tecla para regresar al menu principal");
     getch();
 }
-// void print_pin(){
-//     char pin[100];
-//     int x, charDesencrip;
-//     system("cls");
-//     pinArchivo = fopen("pin.txt", "r");
-//     while( fgets(pin, 100, pinArchivo)!= NULL){
-//         printf("%s", pin);
-//     }
-//     char *ptr = strtok(pin, " "); 
-// 	   while(ptr != NULL){
-//          x = atoi(ptr);
-//          charDesencrip = desencrip(x);
-// 		    ptr = strtok(NULL, " ");
-// 	    }
-//     fclose(pinArchivo);
-//     getch();
-// }
-//Funcion que busca el archivo pin.txt, en caso de existir, y este tiene algo, cambiara la cantidad de opciones que se pueden mostrar
-void verificar_pin(){
-    pinArchivo = fopen("pin.txt", "r");
-    if (pinArchivo != NULL) {
-        fseek (pinArchivo, 0, SEEK_END);
-        size = ftell(pinArchivo);
+
+//Funcion que recibe la ruta del archivo, y verifica si existe, si tiene informacion o no
+//ENTRADA: 
+//@rutaDelArchivo: es la ruta del archivo a verificar.
+//SALIDA:
+//@status: retorna 0 si el archivo no existe.
+//         retorna 1 si el archivo existe, pero no tiene informacion.
+//         retorna 2 si el archivo existe y tiene informacion dentro.
+int verificar_archivo(char *rutaDelArchivo){
+    FILE *archivo;
+    int status, size;
+
+    archivo = fopen(rutaDelArchivo, "r");
+    if (archivo != NULL) {
+        fseek (archivo, 0, SEEK_END);
+        size = ftell(archivo);
         if (size != 0) {
-            pinAsignado=1;
-            numeroOpciones=3;
+            status=2;
         }
         else{
-            pinAsignado=0;
-            numeroOpciones=1;
+            status=1;
         }
     }
     else{
-        pinAsignado=0;
-        numeroOpciones=1;
+        status = 0;
     }
-    fclose(pinArchivo);
+    fclose(archivo);
+
+    return status;
 }
+
+
 //Funcion que busca el pin ya creado, compara con el que esta ingresando el usuario, y, en caso de ser iguales, se inicia la sesion
 //ENTRADA:
 //(dentro de la funcion) @pinIngresado: el pin que el usuario da
@@ -220,6 +292,7 @@ void verificar_pin(){
 int iniciar_sesion(){
     char pinIngresado[5], pinPrograma[100];
     int intentos=4, fallo, i=0, c, sesion;
+    FILE *pinArchivo;
     pinArchivo = fopen("pin.txt", "r");
     while (c != EOF){
         c = fgetc(pinArchivo);
@@ -232,11 +305,11 @@ int iniciar_sesion(){
         fallo=0;
         system("cls");
         color(6);
+        printf("\n\n\n\n");
         centrar_texto(18); printf("Ingresa el tu PIN:\n");
         color(7);
         centrar_texto(4);
         gets(pinIngresado);
-        printf("%s - %s\n", pinIngresado, pinPrograma);
         if(!compare(pinIngresado, pinPrograma)){
             color(4);
             intentos--;
@@ -247,7 +320,6 @@ int iniciar_sesion(){
             color(2);
             centrar_texto(32); printf("PIN ingresado de manera exitosa!\n");
         }
-        printf("%s - %s\n", pinIngresado, pinPrograma);
         centrar_texto(39); printf("Pulsa cualquier tecla para continuar...\n");
         getch();
     }
@@ -263,27 +335,40 @@ int iniciar_sesion(){
 
     return sesion;
 }
+
+
 //Funcion que ejecuta la opcion seleccionada del menu principal, dependiendo si hay o no un pin asignado
 //ENTRADA:
 //@opcion: es el numero de opcion que se ha seleccionado
 void ejecutar_opcion_menu_principal(int opcion){
-    int sesion = 0 ; 
-    if(pinAsignado == 0){
+    int sesion = 0, opcionABC; 
+    if(existePin != 1){
         if(opcion == 0){
             crear_pin();
         }
-        else if (opcion == numeroOpciones){
+        else if (opcion == totalOpcMenuPrin){
             salida=1;
         }
     }
     else{
         if(opcion == 0){
             sesion = iniciar_sesion();
+            if(sesion != 0){
+                do{
+                    system("cls");
+                    opcionABC = menu_abc();
+                    ejecutar_opcion_menu_abc(opcionABC);
+                }
+                while(salidaABC==0);
+            }
+            else{
+                exit(0);
+            }
         }
-        else if(opcion == numeroOpciones-2){
+        else if(opcion == totalOpcMenuPrin-2){
             //print_pin();
         }
-        else if (opcion == numeroOpciones){
+        else if (opcion == totalOpcMenuPrin){
             salida=1;
         }
     }
