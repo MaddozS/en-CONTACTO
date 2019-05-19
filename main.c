@@ -11,20 +11,28 @@
 #define BLOCK 219
 #define ENTER 13
 
-//FUNCIONES
-void color(char color);
+//PANTALLA
+//X maxima = 200
+//Y maxima = 30
+
+//FUNCIONES generales
 void titulo();
-void imprimir_menu_principal(int opcionSeleccionada);
+void posicion_cursor(int extensionString, int y);
+void color(char color);
 void esconder_cursor();
-void centrar_texto(int espacios);
+int verificar_archivo(char *rutaDelArchivo);
+
+//FUNCIONES menu principal
+void imprimir_menu_principal(int opcionSeleccionada);
 void ejecutar_opcion_menu_principal(int opcion);
 void crear_pin();
 void verificar_pin(int statusPin);
+int iniciar_sesion();
+
+//FUNCIONES MENU ABC
 int menu_abc();
 void imprimir_menu_abc(int opcionSeleccionada);
 void ejecutar_opcion_menu_abc(int opcionSeleccionada);
-int verificar_archivo(char *rutaDelArchivo);
-int iniciar_sesion();
 void crear_contacto();
 
 //Variables globales
@@ -73,20 +81,20 @@ void crear_contacto(){
 //Imprime las opciones disponibles dentro del menu de Altas Bajas y Cambios, si la opcion esta seleccionada, se imprimira de un color diferente
 void imprimir_menu_abc(int opcionSeleccionada){
     if(opcionSeleccionada == 0){color(4);} else{color(7);} 
-    centrar_texto(14);
-    printf("\nAgregar contactos");
+    posicion_cursor(17,5);
+    printf("Agregar contactos");
     if(opcionSeleccionada == 1){color(4);} else{color(7);} 
-    centrar_texto(14);
-    printf("\nEditar un contacto");
+    posicion_cursor(18,6);
+    printf("Editar un contacto");
     if(opcionSeleccionada == 2){color(4);} else{color(7);} 
-    centrar_texto(14);
-    printf("\nEliminar un contacto");
+    posicion_cursor(20,7);
+    printf("Eliminar un contacto");
     if(opcionSeleccionada == 3){color(4);} else{color(7);} 
-    centrar_texto(14);
-    printf("\nVer todos los contactos");
+    posicion_cursor(23,8);
+    printf("Ver todos los contactos");
     if(opcionSeleccionada == 4){color(4);} else{color(7);} 
-    centrar_texto(14);
-    printf("\nRegresar al menu principal");
+    posicion_cursor(26,9);
+    printf("Regresar al menu principal");
 }
 //Funcion que itera, mediante el teclado, la opcion seleccionada en el menu de Altas Bajas y Cambios
 //@SALIDA: Si se aprieta la tecla ENTER, el ciclo se rompe y la funcion devolvera la opcion seleccionada del menu de ABC
@@ -155,47 +163,59 @@ int menu_principal_opciones(){
 //Funcion que imprime el titulo del programa
 void titulo(){
     color(6);
-    centrar_texto(66);
-    printf("   __    __        ___   ___    __  _____  _      ___  _____  ___ \n");
-    centrar_texto(66);
-    printf("  /__\\/\\ \\ \\      / __\\ /___\\/\\ \\ \\/__   \\/_\\    / __\\/__   \\/___\\\n");
-    centrar_texto(66);
-    printf(" /_\\ /  \\/ /____ / /   //  //  \\/ /  / /\\//_\\\\  / /     / /\\//  //\n");
-    centrar_texto(66);
-    printf("//__/ /\\  /_____/ /___/ \\_// /\\  /  / / /  _  \\/ /___  / / / \\_// \n");
-    centrar_texto(66);
-    printf("\\__/\\_\\ \\/      \\____/\\___/\\_\\ \\/   \\/  \\_/ \\_/\\____/  \\/  \\___/  \n\n\n");
+    posicion_cursor(66,1);
+    printf("   __    __        ___   ___    __  _____  _      ___  _____  ___ ");
+    posicion_cursor(66,2);
+    printf("  /__\\/\\ \\ \\      / __\\ /___\\/\\ \\ \\/__   \\/_\\    / __\\/__   \\/___\\");
+    posicion_cursor(66,3);
+    printf(" /_\\ /  \\/ /____ / /   //  //  \\/ /  / /\\//_\\\\  / /     / /\\//  //");
+    posicion_cursor(66,4);
+    printf("//__/ /\\  /_____/ /___/ \\_// /\\  /  / / /  _  \\/ /___  / / / \\_// ");
+    posicion_cursor(66,5);
+    printf("\\__/\\_\\ \\/      \\____/\\___/\\_\\ \\/   \\/  \\_/ \\_/\\____/  \\/  \\___/  ");
 }
-//Funcion que imprime n cantidad de espacios para correr el texto, para que centre el texto
-void centrar_texto(int extensionString){
-    int i;
-    for(i = 1; i <= 60-(extensionString/2); i++){ printf(" "); }
+//Funcion que posiciona el cursor de la ventana de comandos para imprimir lo que se quiera
+//ENTRADA:
+//@extensionString: la longitud del string que se quierep posicionar, para que se imprima centrado de manera horizontal
+//@y: la coordenada en y de la ventana de comandos0
+void posicion_cursor(int extensionString, int y)
+{
+    int x = 60-(extensionString/2);
+	HANDLE manipulador;
+	COORD coordenadas;
+	manipulador = GetStdHandle(STD_OUTPUT_HANDLE);
+	coordenadas.X = x;
+	coordenadas.Y = y;
+	SetConsoleCursorPosition(manipulador, coordenadas);
 }
 //Funcion que unicamente imprime las opciones del programa, dependiendo si hay o no hay pin
 void imprimir_menu_principal(int opcionSeleccionada){
     //Cambio de color si la opcion esta seleccionada
+    int y;
     if(existePin == 1){
-        if(opcionSeleccionada == 0){color(4);} else{color(7);} 
-        centrar_texto(14);
-        printf("Iniciar sesi%cn\n", 162);
+        y=11;
+        if(opcionSeleccionada == 0){color(4);} else{color(7);}
+        posicion_cursor(14, 8);
+        printf("Iniciar sesi%cn", 162);
         //Cambio de color si la opcion esta seleccionada
         if(opcionSeleccionada == totalOpcMenuPrin-2){color(4);} else{color(7);} 
-        centrar_texto(8);
-        printf("Opci%cn 2\n", 162);
+        posicion_cursor(8, 9);
+        printf("Opci%cn 2", 162);
         //Cambio de color si la opcion esta seleccionada
         if(opcionSeleccionada == totalOpcMenuPrin-1){color(4);} else{color(7);}
-        centrar_texto(8);
-        printf("Opci%cn 3\n", 162);
+        posicion_cursor(8, 10);
+        printf("Opci%cn 3", 162);
     }
     else{
+        y=9;
         if(opcionSeleccionada == 0){color(4);} else{color(7);} 
-        centrar_texto(9);
-        printf("Crear PIN\n");
+        posicion_cursor(8, 8);
+        printf("Crear PIN");
     }
     //Cambio de color si la opcion esta seleccionada
     if(opcionSeleccionada == totalOpcMenuPrin){color(4);} else{color(7);}
-    centrar_texto(18);
-    printf("Salir del programa\n");
+    posicion_cursor(18, y);
+    printf("Salir del programa");
 }
 //Funcion que lee le un pin que ingrese el usuario, en caso de no cumplir con las caracteristicas requeridas, se le pedira de nuevo.
 void crear_pin(){
@@ -207,18 +227,16 @@ void crear_pin(){
     do{
         error=0;
         color(6);
-        printf("\n\n\n\n");
-        centrar_texto(66); printf("Ingresa PIN con el que vas a proteger tus contactos (de 4 digitos):\n");
+        posicion_cursor(66, 8);; printf("Ingresa PIN con el que vas a proteger tus contactos (de 4 digitos):");
         color(7);
         fflush(stdin);
-        centrar_texto(4);
+        posicion_cursor(4, 9);
         gets(pinUsuario);
         if(strlen(pinUsuario) < 4 || strlen(pinUsuario) > 4){
             color(4);
-            printf("\n\n\n\n");
-            centrar_texto(46); printf("El pin debe tener 4 digitos, vuelve a ponerlo!\n\n");
+            posicion_cursor(46, 11); printf("El pin debe tener 4 digitos, vuelve a ponerlo!");
             color(7);
-            centrar_texto(46); printf("Pulsa cualquier tecla para intentarlo de nuevo");
+            posicion_cursor(49, 12); printf("Pulsa cualquier tecla para intentarlo de nuevo...");
             error=1;
             getch();
         }
@@ -226,10 +244,9 @@ void crear_pin(){
             for(i=0; i<4; i++){
                 if(pinUsuario[i] < '0' || pinUsuario[i]>'9'){
                     color(4);
-                    printf("\n\n\n\n");
-                    centrar_texto(52); printf("El pin debe contener solo numeros, vuelve a ponerlo!\n\n");
+                    posicion_cursor(52,11); printf("El pin debe contener solo numeros, vuelve a ponerlo!");
                     color(7);
-                    centrar_texto(46); printf("Pulsa cualquier tecla para intentarlo de nuevo");
+                    posicion_cursor(49,12); printf("Pulsa cualquier tecla para intentarlo de nuevo...");
                     error=1;
                     getch();
                     break;
@@ -247,9 +264,8 @@ void crear_pin(){
     fputs(pinEncriptado, pinArchivo);
     fclose(pinArchivo);
 
-    printf("\n\n\n\n");
-    centrar_texto(21); printf("PIN Creado con exito!\n");
-    centrar_texto(53); printf("Pulsa cualquier tecla para regresar al menu principal");
+    posicion_cursor(21, 11); printf("PIN Creado con exito!");
+    posicion_cursor(56, 12); printf("Pulsa cualquier tecla para regresar al menu principal...");
     getch();
 }
 
@@ -305,27 +321,26 @@ int iniciar_sesion(){
         fallo=0;
         system("cls");
         color(6);
-        printf("\n\n\n\n");
-        centrar_texto(18); printf("Ingresa el tu PIN:\n");
+        posicion_cursor(18, 8); printf("Ingresa el tu PIN:");
         color(7);
-        centrar_texto(4);
+        posicion_cursor(4, 9);
         gets(pinIngresado);
         if(!compare(pinIngresado, pinPrograma)){
             color(4);
             intentos--;
-            centrar_texto(42); printf("El pin es incorrecto! Te quedan %d intentos\n", intentos);
+            posicion_cursor(41, 11); printf("El pin es incorrecto! Te quedan %d intentos", intentos);
             fallo=1;
         }
         else{
             color(2);
-            centrar_texto(32); printf("PIN ingresado de manera exitosa!\n");
+            posicion_cursor(32, 11); printf("PIN ingresado de manera exitosa!");
         }
-        centrar_texto(39); printf("Pulsa cualquier tecla para continuar...\n");
+        posicion_cursor(39, 12); printf("Pulsa cualquier tecla para continuar...");
         getch();
     }
     while(intentos > 0 && fallo == 1);
     if(intentos == 0){
-        centrar_texto(30); printf("Has fallado todos los intentos\n");
+        posicion_cursor(30, 13); printf("Has fallado todos los intentosposicion_cursor");
         sesion=0;
         getch();
     }
@@ -335,7 +350,6 @@ int iniciar_sesion(){
 
     return sesion;
 }
-
 
 //Funcion que ejecuta la opcion seleccionada del menu principal, dependiendo si hay o no un pin asignado
 //ENTRADA:
