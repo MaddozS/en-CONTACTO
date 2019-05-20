@@ -1,11 +1,11 @@
-
+//Librerias usadas
 #include <stdio.h>
 #include <Windows.h>
 #include <conio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
-#include "encrypt.h"
+#include "encrypt.h" //requisito funcional 15
 
 #include <dirent.h>
 
@@ -16,6 +16,7 @@
 #define ENTER 13
 #define ESC 27
 
+//definicion del codigo ASCII de ciertos caracteres
 #define ESQUINA_SD 187
 #define ESQUINA_SI 201
 #define ESQUINA_ID 188
@@ -35,7 +36,7 @@ void esconder_cursor();
 int verificar_archivo(char *rutaDelArchivo);
 void imprimir_recuadro(int xInicial, int yInicial, int xFinal, int yFinal);
 
-//FUNCIONES menu principal
+//FUNCIONES menu principal --- Requisito funcional 10-14
 void imprimir_menu_principal(int opcionSeleccionada);
 void ejecutar_opcion_menu_principal(int opcion);
 void crear_pin();
@@ -44,7 +45,7 @@ int iniciar_sesion();
 int cambiar_pin();
 int recuperar_pin();
 
-//FUNCIONES MENU ABC
+//FUNCIONES MENU ABC ---  Requisitos funcionales 1-9
 int menu_abc();
 void imprimir_menu_abc(int opcionSeleccionada);
 void ejecutar_opcion_menu_abc(int opcionSeleccionada);
@@ -60,7 +61,7 @@ int salida=0, salidaABC=0, existePin, totalOpcMenuPrin;
 
 //Funcion main
 //Es la que lleva el proceso del todo el programa
-int main(int argc, char const *argv[])
+int main(void)
 {
     int opcion, statusPin;
 
@@ -77,6 +78,10 @@ int main(int argc, char const *argv[])
     while(salida!=1);
     return 0;
 }
+
+//Funcion que checa es estatus general del pin del usuario, y si existe, cambiara la cantidad de opciones que mostrara el menu principal
+//ENTRADA:
+//@statusPin: el estado en el que se encuentra el archivo de texto del pin
 void verificar_pin(int statusPin){
      if(statusPin != 2){
         totalOpcMenuPrin=1;
@@ -87,7 +92,10 @@ void verificar_pin(int statusPin){
         existePin=1;
     }
 }
+
 //Funcion que ejecuta la opcion seleccionada en el menu de Altas Bajas y Cambios
+//ENTRADA:
+//@opcionSeleccionada: el numero de la opcion del menu ABC
 void ejecutar_opcion_menu_abc(int opcionSeleccionada){
     if(opcionSeleccionada == 0){
         contacto_opciones(0, "nuevo");
@@ -99,15 +107,15 @@ void ejecutar_opcion_menu_abc(int opcionSeleccionada){
         eliminar_contacto();
     }
     else if(opcionSeleccionada == 3){
-        if(verificar_archivo("contactos.txt") !=2){
-             system("cls");
+        if(verificar_archivo("contactos.txt") !=2){ //se verifica el estado del archivo "contactos.txt"
+            system("cls");
             color(4);
             posicion_cursor(x_centrada(32), 6); printf("No hay contactos registrados aun");
             posicion_cursor(x_centrada(38), 7); printf("Pulsa cualquier tecla para regresar...");
             getch();
         }
         else{
-            seleccionar_contacto(contactos_totales());
+            seleccionar_contacto(contactos_totales()); //en caso de que existan contactos, se imprimiran y seleccionaran, pero sin hacer algun cambio
         }
     }
     else if(opcionSeleccionada == 4){
@@ -115,6 +123,10 @@ void ejecutar_opcion_menu_abc(int opcionSeleccionada){
     }
 }
 
+
+//Funcion que retorna la cantidad de contactos registrados por el usuario en el archivo "contactos.txt"
+//SALIDA:
+//@totalContactos: numero de contactos registrados
 int contactos_totales(){
     FILE *contactos;
     char line[1024];
@@ -122,45 +134,57 @@ int contactos_totales(){
     system("cls");
     contactos = fopen("contactos.txt", "r");
     while(fgets(line, 1024, contactos) != NULL){
+        //se van contando las lineas que hay en el archivo (linea = contacto)
         totalContactos++;
     }
     fclose(contactos);
+
     return totalContactos;
 }
+
+//Funcion que elimina el contacto seleccionado del menu de contactos
 void eliminar_contacto(){
     int totalContactos, contacto;
-    if(verificar_archivo("contactos.txt") != 2){
+    if(verificar_archivo("contactos.txt") != 2){ //se verefica el estado del archivo "contactos.txt"
         system("cls");
         color(4);
         posicion_cursor(x_centrada(32), 6); printf("No hay contactos registrados aun");
         posicion_cursor(x_centrada(38), 7); printf("Pulsa cualquier tecla para regresar...");
         getch();
     }
-    else{
+    else{ //en caso de que existan los contactos, se imprimiran, creando un menu de los contactos registrados
         totalContactos = contactos_totales();
         contacto = seleccionar_contacto(totalContactos);
-        if(contacto != -1){
+        if(contacto != -1){//Si el retorno no fue ESC, se elimina el respectivo contacto, sino, solo se sale del menu de contactos
             contacto_opciones(contacto, "eliminar");
         }
     }
 }
+
+//Funcion que selecciona un contacto y permite editarlo por completo
 void editar_contactos(){
     int contacto, totalContactos;
-    if(verificar_archivo("contactos.txt") != 2){
+    if(verificar_archivo("contactos.txt") != 2){ //verifica el estado del archivo "contactos.txt"
         system("cls");
         color(4);
         posicion_cursor(x_centrada(32), 6); printf("No hay contactos registrados aun");
         posicion_cursor(x_centrada(38), 7); printf("Pulsa cualquier tecla para regresar...");
         getch();
     }
-    else{
+    else{ //si hay contactos, se imprimen creando un menu de los contactos
         totalContactos = contactos_totales();
         contacto = seleccionar_contacto(totalContactos);
-        if(contacto != -1){
+        if(contacto != -1){//si el retorno no fue ESC, se le permitira a el usuario editar el contenido de su contacto
             contacto_opciones(contacto, "editar");
         }
     }
-}  
+} 
+
+//Funcion que funciona como menu de los contactos registrados, si se selecciona con ENTER, su posicion se pasara como retorno de la funcion, si se usa ESC, dara una posicion inexistente
+//ENTRADA: 
+//@totalContactos: numero del total de contactos registrados
+//SALIDA:
+//@posOpcionContacto: la posicion del de donde se haya quedado el contador, solo se retorna si la salida fue con ENTER
 int seleccionar_contacto(int totalContactos){
     int posOpcionContacto=0, key=0;
     do{
@@ -194,8 +218,14 @@ int seleccionar_contacto(int totalContactos){
 
     return posOpcionContacto;
 }
+
+//Funcion que imprime unicamente el menu, el contacto cuya posicion haya sido seleccionada se imprimira de color diferente
+//ENTRADA:
+//@contactoSeleccionada: la posicion del contacto seleccionado
+//@contactosTotal: total de contactos registrados
 void imprimir_contactos(int contactoSeleccionado, int contactosTotal){
     int i, j, datoCont, ajuste=0, tronoLong=0;
+    //struct que almacenara todos los contactos
     struct contacto{
         char nombre[128];
         char tel[15];
@@ -210,39 +240,35 @@ void imprimir_contactos(int contactoSeleccionado, int contactosTotal){
     FILE *contactosArchivo;
     j=0;
     contactosArchivo = fopen("contactos.txt", "r");
-    while(fgets(line, 2048, contactosArchivo) != NULL){
+    while(fgets(line, 2048, contactosArchivo) != NULL){ //funcion que obtendra, linea por linea, los contactos siendo linea = info del contacto, unicamente separado por ;
         line[strlen(line)-1] = '\0';
         rest = line;
         datoCont = 1;
-		while ((ptr = strtok_r(rest, ";", &rest))){
 
-            
+		while ((ptr = strtok_r(rest, ";", &rest))){//strok_r dividira la linea obtenida para obtener cada dato del contacto
             strcpy(dataEncrypted, ptr);
 
             decrypt(dataEncrypted, dataDecrypted);
-
+            //se buscara el dato de entre todos los contactos para saber cual sera el tamaño final de los tarjetas a imprimir
             if(strlen(dataDecrypted) > tronoLong){
                 tronoLong = strlen(dataDecrypted);
             }
+            //dependiendo de cual sea el dato, se asignara en su respectiva posicion del struct
             switch(datoCont){
                 case 1:
                     strcpy(contactos[j].nombre,dataDecrypted);
-                    // printf("%s\n", contactos[j].nombre);
                     datoCont++;
                     break;
                 case 2:
                     strcpy(contactos[j].tel,dataDecrypted);
-                    // printf("%s\n", contactos[j].tel);
                     datoCont++;
                     break;
                 case 3:
                     strcpy(contactos[j].correo,dataDecrypted);
-                    // printf("%s\n", contactos[j].correo);
                     datoCont++;
                     break;
                 case 4:
                     strcpy(contactos[j].direccion,dataDecrypted);
-                    // printf("%s\n", contactos[j].direccion);
                     datoCont++;
                     break;
             }
@@ -251,15 +277,18 @@ void imprimir_contactos(int contactoSeleccionado, int contactosTotal){
     }
 
     fclose(contactosArchivo);
+    //se iteraran todos los contactos del struc para ser impresos 
     for (i = 0; i < contactosTotal; i++) {
+        //si el contador coincide con el contacto seleccionado, se imprimira de otro color
         if(i == contactoSeleccionado){
             color(13);
         }
         else{
             color(7);
         }
+        //se imprimira un recuadro del contacto con el respectivo tamaño encontrado
         imprimir_recuadro(x_centrada(tronoLong+4), i+ajuste, x_centrada(tronoLong+4)+tronoLong+3, i+ajuste+7);
-
+        //cada dato se imprimira dentro del recuadro, para esto, se posiciona el puntero donde se necesite, y usando el ajuste para que vaya cambiando de posicion
         posicion_cursor(x_centrada( strlen(contactos[i].nombre)    ), i+ajuste+2); printf("%s", contactos[i].nombre);
         posicion_cursor(x_centrada( strlen(contactos[i].tel)       ), i+ajuste+3); printf("%s", contactos[i].tel);
         posicion_cursor(x_centrada( strlen(contactos[i].correo)    ), i+ajuste+4); printf("%s", contactos[i].correo);
@@ -267,10 +296,15 @@ void imprimir_contactos(int contactoSeleccionado, int contactosTotal){
         ajuste += 8;
     }
 }
-//Funcion que crea un contacto y lo pone en un archivo de texto
+
+//Funcion que editara, eliminara o creara un contacto
+//ENTRADA:
+//@contactoSeleccionado: la posicion del contacto seleccionado
+//@comando: que hara con el contacto (editar, eliminar, crear)
 void contacto_opciones(int contactoSeleccionado, char *comando){
     char stringEncrypted[512], string[2048], line[1024];
     FILE *contactos;
+    //struct del contacto
     struct informacion{
         char nombre[128];
         char tel[15];
@@ -279,6 +313,7 @@ void contacto_opciones(int contactoSeleccionado, char *comando){
     }contacto;
     int contContactos;
     system("cls");
+    //verifica el estado del contacto, para que el archivo sea creado o solo editado
     if(verificar_archivo("contactos.txt") != 2){
         contactos = fopen("contactos.txt", "a+");
     }
@@ -286,8 +321,9 @@ void contacto_opciones(int contactoSeleccionado, char *comando){
         contactos = fopen("contactos.txt", "a");
     }
     fclose(contactos);
-
-    if(strcmp(comando, "eliminar") != 0){
+    //Checa cual es el comando
+    if(strcmp(comando, "eliminar") != 0){//Si la opcion NO fue eliminar...
+        //Ya que las otras 2 opciones requeriran si o si la informacion del contacto, se preguntaran de una vez
         int y=4;
         contContactos=0;
         string[0]='\0';
@@ -322,9 +358,9 @@ void contacto_opciones(int contactoSeleccionado, char *comando){
         encrypt(contacto.direccion, stringEncrypted);
         strcat(string, stringEncrypted);
         strcat(string, "\n");
-        if(strcmp(comando, "editar") == 0){
+        if(strcmp(comando, "editar") == 0){//si la opcion fue editar...
             FILE *temp;
-            temp = fopen("temp.txt", "w+");
+            temp = fopen("temp.txt", "w+"); //se creara un archivo temporal
             contactos = fopen("contactos.txt", "r");
             while(fgets(line, 1024, (FILE*) contactos) ){
                 // si el contacto a editar coincide con nuestro contador lo que se escribira en nuestro archivo temporal sera lo que se obtuvo de fgets
@@ -343,16 +379,16 @@ void contacto_opciones(int contactoSeleccionado, char *comando){
             remove("contactos.txt");
             rename("temp.txt", "contactos.txt");
         }
-        else{
+        else{//en caso de que haya sido crear, simplemente se agregara la informacion del contacto guardado en el string al archivo de los contactos
             contactos = fopen("contactos.txt", "a");
             fputs(string, contactos);
             fclose(contactos);
         }
     }
-    else{
+    else{ // si la opcion fue eliminar...
         FILE *temp;
         contContactos=0;
-        temp = fopen("temp.txt", "w+");
+        temp = fopen("temp.txt", "w+"); //se creara un archivo temporal
         contactos = fopen("contactos.txt", "r");
         while(fgets(line, 1024, (FILE*) contactos) ){
             // si el contacto a eliminar coincide con el contacto que se esta leyendo, no se agrega al archivo temporal
@@ -364,10 +400,11 @@ void contacto_opciones(int contactoSeleccionado, char *comando){
         fflush(temp);
         fclose(contactos);
         fclose(temp);
-        remove("contactos.txt");
-        rename("temp.txt", "contactos.txt");
+        remove("contactos.txt"); //el archivo temporal sera la nueva lista y se eliminara la antigua
+        rename("temp.txt", "contactos.txt"); 
     }
 }
+
 //Imprime las opciones disponibles dentro del menu de Altas Bajas y Cambios, si la opcion esta seleccionada, se imprimira de un color diferente
 void imprimir_menu_abc(int opcionSeleccionada){
     if(opcionSeleccionada == 0){color(13);} else{color(7);}
@@ -391,6 +428,7 @@ void imprimir_menu_abc(int opcionSeleccionada){
     posicion_cursor(x_centrada(26),20);
     printf("Regresar al menu principal");
 }
+
 //Funcion que itera, mediante el teclado, la opcion seleccionada en el menu de Altas Bajas y Cambios
 //@SALIDA: Si se aprieta la tecla ENTER, el ciclo se rompe y la funcion devolvera la opcion seleccionada del menu de ABC
 int menu_abc(){
@@ -561,6 +599,9 @@ void imprimir_menu_principal(int opcionSeleccionada){
     printf("Salir del programa");
 }
 //Funcion que lee le un pin que ingrese el usuario, en caso de no cumplir con las caracteristicas requeridas, se le pedira de nuevo.
+//ENTRADA:
+//@opcion: 0 si el PIN es ingresado por primera vez, para generar la pregunta de recuperacion
+//           cualquier otro numero indicara que solo se editara el PIN
 void crear_pin(int opcion){
     int i, j, error=0;
     char pinUsuario[5], pinEncriptado[1024], aux[1024], pregunta[1024], respuesta[1024], line[2048];
@@ -608,7 +649,7 @@ void crear_pin(int opcion){
     fputs(pinEncriptado, pinArchivo);
     fclose(pinArchivo);
 
-    if(opcion == 0){
+    if(opcion == 0){//en caso de que sea la primera vez que se ingresa PIN, se genera la pregunta de recuperacion
         line[0]='\0';
         system("cls");
         preguntaArchivo = fopen("pregunta.txt", "w+");
@@ -720,6 +761,10 @@ int iniciar_sesion(){
 
     return sesion;
 }
+
+//Funcion que permite cambiar el pin conociendolo previamente
+//SALIDA: 
+//@stop: el estado del programa en general, si se cumple (sea igual a 1), entonces se termina el programa
 int cambiar_pin(){
     char pinIngresado[5], pinPrograma[100];
     int intentos=4, fallo, i=0, c, stop;
@@ -766,6 +811,10 @@ int cambiar_pin(){
 
     return stop;
 }
+
+//Funcion que permite cambiar el pin sin conocerlo previamente
+//SALIDA: 
+//@stop: el estado del programa en general, si se cumple (sea igual a 1), entonces se termina el programa
 int recuperar_pin(){
     char aux[1024], pregunta[1024], respuesta[1024], respUsuario[1024];
     int i=0, c, j=0, stop, intentos=4, fallo = 0;
