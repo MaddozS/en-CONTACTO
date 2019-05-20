@@ -14,6 +14,7 @@
 #define DOWN 80
 #define BLOCK 219
 #define ENTER 13
+#define ESC 27
 
 #define ESQUINA_SD 187
 #define ESQUINA_SI 201
@@ -119,7 +120,9 @@ void editar_contactos(){
     }
     else{
         contacto = seleccionar_contacto(totalContactos);
-        crear_contacto(contacto, "editar");
+        if(contacto != -1){
+            crear_contacto(contacto, "editar");
+        }
     }
 }  
 int seleccionar_contacto(int totalContactos){
@@ -146,9 +149,12 @@ int seleccionar_contacto(int totalContactos){
                     posOpcionContacto++;
                 }
                 break;
+            case ESC:
+                posOpcionContacto = -1;
+                break;
         }
     }
-    while(key != ENTER);
+    while(key != ENTER && key != ESC);
 
     return posOpcionContacto;
 }
@@ -211,7 +217,7 @@ void imprimir_contactos(int contactoSeleccionado, int contactosTotal){
     fclose(contactosArchivo);
     for (i = 0; i < contactosTotal; i++) {
         if(i == contactoSeleccionado){
-            color(6);
+            color(13);
         }
         else{
             color(7);
@@ -246,7 +252,7 @@ void crear_contacto(int contactoSeleccionado, char *comando){
 
     int y=4, contContactos=0;
     string[0]='\0';
-    color(1);
+    color(3);
     posicion_cursor(4, y); printf("Nombre: ");
     color(7);
     gets(contacto.nombre);
@@ -254,7 +260,7 @@ void crear_contacto(int contactoSeleccionado, char *comando){
     strcat(string, stringEncrypted);
     strcat(string, ";");
 
-    color(1);
+    color(3);
     posicion_cursor(4, y+2); printf("Telefono: ");
     color(7);
     gets(contacto.tel);
@@ -262,7 +268,7 @@ void crear_contacto(int contactoSeleccionado, char *comando){
     strcat(string, stringEncrypted);
     strcat(string, ";");
 
-    color(1);
+    color(3);
     posicion_cursor(4, y+4); printf("Correo: ");
     color(7);
     gets(contacto.correo);
@@ -270,7 +276,7 @@ void crear_contacto(int contactoSeleccionado, char *comando){
     strcat(string, stringEncrypted);
     strcat(string, ";");
 
-    color(1);
+    color(3);
     posicion_cursor(4, y+6); printf("Direccion: ");
     color(7);
     gets(contacto.direccion);
@@ -308,23 +314,23 @@ void crear_contacto(int contactoSeleccionado, char *comando){
 }
 //Imprime las opciones disponibles dentro del menu de Altas Bajas y Cambios, si la opcion esta seleccionada, se imprimira de un color diferente
 void imprimir_menu_abc(int opcionSeleccionada){
-    if(opcionSeleccionada == 0){color(4);} else{color(7);}
+    if(opcionSeleccionada == 0){color(13);} else{color(7);}
     imprimir_recuadro(x_centrada(28), 3, x_centrada(28)+27,5);
     posicion_cursor(x_centrada(17),4);
     printf("Agregar contactos");
-    if(opcionSeleccionada == 1){color(4);} else{color(7);}
+    if(opcionSeleccionada == 1){color(13);} else{color(7);}
     imprimir_recuadro(x_centrada(28), 7, x_centrada(28)+27,9);
     posicion_cursor(x_centrada(18),8);
     printf("Editar un contacto");
-    if(opcionSeleccionada == 2){color(4);} else{color(7);} 
+    if(opcionSeleccionada == 2){color(13);} else{color(7);} 
     imprimir_recuadro(x_centrada(28), 11, x_centrada(28)+27,13);
     posicion_cursor(x_centrada(20),12);
     printf("Eliminar un contacto");
-    if(opcionSeleccionada == 3){color(4);} else{color(7);} 
+    if(opcionSeleccionada == 3){color(13);} else{color(7);} 
     imprimir_recuadro(x_centrada(28), 15, x_centrada(28)+27,17);
     posicion_cursor(x_centrada(23),16);
     printf("Ver todos los contactos");
-    if(opcionSeleccionada == 4){color(4);} else{color(7);} 
+    if(opcionSeleccionada == 4){color(13);} else{color(7);} 
     imprimir_recuadro(x_centrada(28), 19, x_centrada(28)+27,21);
     posicion_cursor(x_centrada(26),20);
     printf("Regresar al menu principal");
@@ -470,30 +476,30 @@ void imprimir_menu_principal(int opcionSeleccionada){
     int y;
     if(existePin == 1){
         y=20;
-        if(opcionSeleccionada == 0){color(4);} else{color(7);}
+        if(opcionSeleccionada == 0){color(13);} else{color(7);}
         imprimir_recuadro(x_centrada(20), 8, x_centrada(20)+19, 10);
         posicion_cursor(x_centrada(14), 9);
         printf("Iniciar sesi%cn", 162);
         //Cambio de color si la opcion esta seleccionada
-        if(opcionSeleccionada == totalOpcMenuPrin-2){color(4);} else{color(7);}
+        if(opcionSeleccionada == totalOpcMenuPrin-2){color(13);} else{color(7);}
         imprimir_recuadro(x_centrada(20), 12, x_centrada(20)+19, 14);
         posicion_cursor(x_centrada(8), 13);
         printf("Opci%cn 2", 162);
         //Cambio de color si la opcion esta seleccionada
-        if(opcionSeleccionada == totalOpcMenuPrin-1){color(4);} else{color(7);}
+        if(opcionSeleccionada == totalOpcMenuPrin-1){color(13);} else{color(7);}
         imprimir_recuadro(x_centrada(20), 16, x_centrada(20)+19, 18);
         posicion_cursor(x_centrada(8), 17);
         printf("Opci%cn 3", 162);
     }
     else{
         y=12;
-        if(opcionSeleccionada == 0){color(4);} else{color(7);}
+        if(opcionSeleccionada == 0){color(13);} else{color(7);}
         imprimir_recuadro(x_centrada(20), 8, x_centrada(20)+19, 10);
         posicion_cursor(x_centrada(8), 9);
         printf("Crear PIN");
     }
     //Cambio de color si la opcion esta seleccionada
-    if(opcionSeleccionada == totalOpcMenuPrin){color(4);} else{color(7);}
+    if(opcionSeleccionada == totalOpcMenuPrin){color(13);} else{color(7);}
     imprimir_recuadro(x_centrada(20), y, x_centrada(20)+19, y+2);
     posicion_cursor(x_centrada(18), y+1);
     printf("Salir del programa");
@@ -507,7 +513,7 @@ void crear_pin(){
     //Do-While para volver a pedir el pin en caso que no cumpla con la extension pedida
     do{
         error=0;
-        color(6);
+        color(13);
         
         posicion_cursor(x_centrada(66), 7); printf("Ingresa PIN con el que vas a proteger tus contactos (de 4 digitos):");
         color(7);
@@ -603,8 +609,8 @@ int iniciar_sesion(){
     do{
         fallo=0;
         system("cls");
-        color(6);
-        posicion_cursor(x_centrada(18), 7); printf("Ingresa el tu PIN:");
+        color(13);
+        posicion_cursor(x_centrada(5), 7); printf("Ingresa tu PIN:");
         color(7);
         imprimir_recuadro(x_centrada(8), 9, x_centrada(8)+7, 11);
         posicion_cursor(x_centrada(4), 10);
