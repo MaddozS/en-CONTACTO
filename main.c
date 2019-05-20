@@ -45,7 +45,7 @@ int iniciar_sesion();
 int menu_abc();
 void imprimir_menu_abc(int opcionSeleccionada);
 void ejecutar_opcion_menu_abc(int opcionSeleccionada);
-void crear_contacto();
+void crear_contacto(int contactoSeleccionado, char *comando);
 void editar_contactos();
 int seleccionar_contacto(int totalContactos);
 void imprimir_contactos(int contactoSeleccionado, int contactosTotal);
@@ -86,7 +86,7 @@ void verificar_pin(int statusPin){
 //Funcion que ejecuta la opcion seleccionada en el menu de Altas Bajas y Cambios
 void ejecutar_opcion_menu_abc(int opcionSeleccionada){
     if(opcionSeleccionada == 0){
-        crear_contacto();
+        crear_contacto(0, "nuevo");
     }
     else if(opcionSeleccionada == 1){
         editar_contactos();
@@ -110,15 +110,24 @@ int contactos_totales(){
 void editar_contactos(){
     int contacto, totalContactos;
     totalContactos = contactos_totales();
-
-    contacto = seleccionar_contacto(totalContactos);
+    if(verificar_archivo("contactos.txt") != 2){
+        system("cls");
+        color(4);
+        posicion_cursor(x_centrada(32), 6); printf("No hay contactos registrados aun");
+        posicion_cursor(x_centrada(38), 7); printf("Pulsa cualquier tecla para regresar...");
+        getch();
+    }
+    else{
+        contacto = seleccionar_contacto(totalContactos);
+        crear_contacto(contacto, "editar");
+    }
 }  
 int seleccionar_contacto(int totalContactos){
     int posOpcionContacto=0, key=0;
     do{
         system("cls");
         imprimir_contactos(posOpcionContacto, totalContactos);
-        posicion_cursor(100, posOpcionContacto*8);
+        posicion_cursor(5, posOpcionContacto*8);
         key = getch();
         switch (key){
             case UP:
@@ -201,23 +210,24 @@ void imprimir_contactos(int contactoSeleccionado, int contactosTotal){
 
     fclose(contactosArchivo);
     for (i = 0; i < contactosTotal; i++) {
-        if(i==contactoSeleccionado){
+        if(i == contactoSeleccionado){
             color(6);
         }
         else{
             color(7);
         }
         imprimir_recuadro(x_centrada(tronoLong+4), i+ajuste, x_centrada(tronoLong+4)+tronoLong+3, i+ajuste+7);
-        posicion_cursor(x_centrada( strlen(contactos[i].nombre) ), i+ajuste+2); printf("%s", contactos[i].nombre);
-        posicion_cursor(x_centrada( strlen(contactos[i].tel) ), i+ajuste+3); printf("%s", contactos[i].tel);
-        posicion_cursor(x_centrada( strlen(contactos[i].correo) ), i+ajuste+4); printf("%s", contactos[i].correo);
+
+        posicion_cursor(x_centrada( strlen(contactos[i].nombre)    ), i+ajuste+2); printf("%s", contactos[i].nombre);
+        posicion_cursor(x_centrada( strlen(contactos[i].tel)       ), i+ajuste+3); printf("%s", contactos[i].tel);
+        posicion_cursor(x_centrada( strlen(contactos[i].correo)    ), i+ajuste+4); printf("%s", contactos[i].correo);
         posicion_cursor(x_centrada( strlen(contactos[i].direccion) ), i+ajuste+5); printf("%s", contactos[i].direccion);
         ajuste += 8;
     }
 }
 //Funcion que crea un contacto y lo pone en un archivo de texto
-void crear_contacto(){
-    char nombreEncrypted[1024], telEncrypted[256], correoEncrypted[512], direccionEncrypted[512];
+void crear_contacto(int contactoSeleccionado, char *comando){
+    char stringEncrypted[512], string[2048], line[1024];
     FILE *contactos;
     struct informacion{
         char nombre[128];
@@ -232,31 +242,69 @@ void crear_contacto(){
     else{
         contactos = fopen("contactos.txt", "a");
     }
-    int y=4;
-    posicion_cursor(4, y); printf("Nombre: ");
-    gets(contacto.nombre);
-    encrypt(contacto.nombre, nombreEncrypted);
-    fputs(nombreEncrypted, contactos);
-    fputc(';', contactos);
-
-    posicion_cursor(4, y+2); printf("Telefono: ");
-    gets(contacto.tel);
-    encrypt(contacto.tel, telEncrypted);
-    fputs(telEncrypted, contactos);
-    fputc(';', contactos);
-
-    posicion_cursor(4, y+4); printf("Correo: ");
-    gets(contacto.correo);
-    encrypt(contacto.correo, correoEncrypted);
-    fputs(correoEncrypted, contactos);
-    fputc(';', contactos);
-
-    posicion_cursor(4, y+6); printf("Direccion: ");
-    gets(contacto.direccion);
-    encrypt(contacto.direccion, direccionEncrypted);
-    fputs(direccionEncrypted, contactos);
-    fputc('\n', contactos);
     fclose(contactos);
+
+    int y=4, contContactos=0;
+    string[0]='\0';
+    color(1);
+    posicion_cursor(4, y); printf("Nombre: ");
+    color(7);
+    gets(contacto.nombre);
+    encrypt(contacto.nombre, stringEncrypted);
+    strcat(string, stringEncrypted);
+    strcat(string, ";");
+
+    color(1);
+    posicion_cursor(4, y+2); printf("Telefono: ");
+    color(7);
+    gets(contacto.tel);
+    encrypt(contacto.tel, stringEncrypted);
+    strcat(string, stringEncrypted);
+    strcat(string, ";");
+
+    color(1);
+    posicion_cursor(4, y+4); printf("Correo: ");
+    color(7);
+    gets(contacto.correo);
+    encrypt(contacto.correo, stringEncrypted);
+    strcat(string, stringEncrypted);
+    strcat(string, ";");
+
+    color(1);
+    posicion_cursor(4, y+6); printf("Direccion: ");
+    color(7);
+    gets(contacto.direccion);
+    encrypt(contacto.direccion, stringEncrypted);
+    strcat(string, stringEncrypted);
+    strcat(string, "\n");
+
+    if(strcmp(comando, "editar") == 0){
+        FILE *temp;
+        temp = fopen("temp.txt", "w+");
+        contactos = fopen("contactos.txt", "r");
+        while(fgets(line, 1024, (FILE*) contactos) ){
+			// si el contacto a editar coincide con nuestro contador lo que se escribira en nuestro archivo temporal sera lo que se obtuvo de fgets
+			if (contContactos == contactoSeleccionado) {
+			    fputs(string, temp);
+			}
+			//en caso de que no, simplemente pasara la linea en la que se encuentra al archivo temporal
+			else{
+				fputs(line, temp);
+			}
+		    contContactos++;
+		}
+        fflush(temp);
+	    fclose(contactos);
+	    fclose(temp);
+        remove("contactos.txt");
+	    rename("temp.txt", "contactos.txt");
+    }
+    else{
+        contactos = fopen("contactos.txt", "a");
+        fputs(string, contactos);
+	    fclose(contactos);
+    }
+    
 }
 //Imprime las opciones disponibles dentro del menu de Altas Bajas y Cambios, si la opcion esta seleccionada, se imprimira de un color diferente
 void imprimir_menu_abc(int opcionSeleccionada){
