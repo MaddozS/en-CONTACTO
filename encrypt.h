@@ -1,14 +1,15 @@
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 //Funcion que encripta un string que se le de
 //@origin: texto que se va a encriptar
 //@destination: variable donde se almacenara el texto encriptado
 void encrypt(char *origin, char *destination){
-    destination[0]='\0';
-    int i, iChar, charEncrypted;
+    int i, iChar, charEncrypted, mem=0;
     char x[128];
+    destination[0]='\0';
+
     for(i = 0; i < strlen(origin); i++){
         int iChar = (int)origin[i];
         charEncrypted = (iChar-10)*13;
