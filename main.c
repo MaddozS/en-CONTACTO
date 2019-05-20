@@ -41,16 +41,18 @@ void ejecutar_opcion_menu_principal(int opcion);
 void crear_pin();
 void verificar_pin(int statusPin);
 int iniciar_sesion();
+int cambiar_pin();
 
 //FUNCIONES MENU ABC
 int menu_abc();
 void imprimir_menu_abc(int opcionSeleccionada);
 void ejecutar_opcion_menu_abc(int opcionSeleccionada);
-void crear_contacto(int contactoSeleccionado, char *comando);
+void contacto_opciones(int contactoSeleccionado, char *comando);
 void editar_contactos();
 int seleccionar_contacto(int totalContactos);
 void imprimir_contactos(int contactoSeleccionado, int contactosTotal);
 int contactos_totales();
+void eliminar_contacto();
 
 //Variables globales
 int salida=0, salidaABC=0, existePin, totalOpcMenuPrin;
@@ -87,15 +89,31 @@ void verificar_pin(int statusPin){
 //Funcion que ejecuta la opcion seleccionada en el menu de Altas Bajas y Cambios
 void ejecutar_opcion_menu_abc(int opcionSeleccionada){
     if(opcionSeleccionada == 0){
-        crear_contacto(0, "nuevo");
+        contacto_opciones(0, "nuevo");
     }
     else if(opcionSeleccionada == 1){
         editar_contactos();
+    }
+    else if(opcionSeleccionada == 2){
+        eliminar_contacto();
+    }
+    else if(opcionSeleccionada == 3){
+        if(verificar_archivo("contactos.txt") !=2){
+             system("cls");
+            color(4);
+            posicion_cursor(x_centrada(32), 6); printf("No hay contactos registrados aun");
+            posicion_cursor(x_centrada(38), 7); printf("Pulsa cualquier tecla para regresar...");
+            getch();
+        }
+        else{
+            seleccionar_contacto(contactos_totales());
+        }
     }
     else if(opcionSeleccionada == 4){
         salidaABC=1;
     }
 }
+
 int contactos_totales(){
     FILE *contactos;
     char line[1024];
@@ -108,9 +126,8 @@ int contactos_totales(){
     fclose(contactos);
     return totalContactos;
 }
-void editar_contactos(){
-    int contacto, totalContactos;
-    totalContactos = contactos_totales();
+void eliminar_contacto(){
+    int totalContactos, contacto;
     if(verificar_archivo("contactos.txt") != 2){
         system("cls");
         color(4);
@@ -119,9 +136,27 @@ void editar_contactos(){
         getch();
     }
     else{
+        totalContactos = contactos_totales();
         contacto = seleccionar_contacto(totalContactos);
         if(contacto != -1){
-            crear_contacto(contacto, "editar");
+            contacto_opciones(contacto, "eliminar");
+        }
+    }
+}
+void editar_contactos(){
+    int contacto, totalContactos;
+    if(verificar_archivo("contactos.txt") != 2){
+        system("cls");
+        color(4);
+        posicion_cursor(x_centrada(32), 6); printf("No hay contactos registrados aun");
+        posicion_cursor(x_centrada(38), 7); printf("Pulsa cualquier tecla para regresar...");
+        getch();
+    }
+    else{
+        totalContactos = contactos_totales();
+        contacto = seleccionar_contacto(totalContactos);
+        if(contacto != -1){
+            contacto_opciones(contacto, "editar");
         }
     }
 }  
@@ -232,7 +267,7 @@ void imprimir_contactos(int contactoSeleccionado, int contactosTotal){
     }
 }
 //Funcion que crea un contacto y lo pone en un archivo de texto
-void crear_contacto(int contactoSeleccionado, char *comando){
+void contacto_opciones(int contactoSeleccionado, char *comando){
     char stringEncrypted[512], string[2048], line[1024];
     FILE *contactos;
     struct informacion{
@@ -241,6 +276,7 @@ void crear_contacto(int contactoSeleccionado, char *comando){
         char correo[128];
         char direccion[256];
     }contacto;
+    int contContactos;
     system("cls");
     if(verificar_archivo("contactos.txt") != 2){
         contactos = fopen("contactos.txt", "a+");
@@ -250,67 +286,86 @@ void crear_contacto(int contactoSeleccionado, char *comando){
     }
     fclose(contactos);
 
-    int y=4, contContactos=0;
-    string[0]='\0';
-    color(3);
-    posicion_cursor(4, y); printf("Nombre: ");
-    color(7);
-    gets(contacto.nombre);
-    encrypt(contacto.nombre, stringEncrypted);
-    strcat(string, stringEncrypted);
-    strcat(string, ";");
+    if(strcmp(comando, "eliminar") != 0){
+        int y=4;
+        contContactos=0;
+        string[0]='\0';
+        color(3);
+        posicion_cursor(4, y); printf("Nombre: ");
+        color(7);
+        gets(contacto.nombre);
+        encrypt(contacto.nombre, stringEncrypted);
+        strcat(string, stringEncrypted);
+        strcat(string, ";");
 
-    color(3);
-    posicion_cursor(4, y+2); printf("Telefono: ");
-    color(7);
-    gets(contacto.tel);
-    encrypt(contacto.tel, stringEncrypted);
-    strcat(string, stringEncrypted);
-    strcat(string, ";");
+        color(3);
+        posicion_cursor(4, y+2); printf("Telefono: ");
+        color(7);
+        gets(contacto.tel);
+        encrypt(contacto.tel, stringEncrypted);
+        strcat(string, stringEncrypted);
+        strcat(string, ";");
 
-    color(3);
-    posicion_cursor(4, y+4); printf("Correo: ");
-    color(7);
-    gets(contacto.correo);
-    encrypt(contacto.correo, stringEncrypted);
-    strcat(string, stringEncrypted);
-    strcat(string, ";");
+        color(3);
+        posicion_cursor(4, y+4); printf("Correo: ");
+        color(7);
+        gets(contacto.correo);
+        encrypt(contacto.correo, stringEncrypted);
+        strcat(string, stringEncrypted);
+        strcat(string, ";");
 
-    color(3);
-    posicion_cursor(4, y+6); printf("Direccion: ");
-    color(7);
-    gets(contacto.direccion);
-    encrypt(contacto.direccion, stringEncrypted);
-    strcat(string, stringEncrypted);
-    strcat(string, "\n");
-
-    if(strcmp(comando, "editar") == 0){
+        color(3);
+        posicion_cursor(4, y+6); printf("Direccion: ");
+        color(7);
+        gets(contacto.direccion);
+        encrypt(contacto.direccion, stringEncrypted);
+        strcat(string, stringEncrypted);
+        strcat(string, "\n");
+        if(strcmp(comando, "editar") == 0){
+            FILE *temp;
+            temp = fopen("temp.txt", "w+");
+            contactos = fopen("contactos.txt", "r");
+            while(fgets(line, 1024, (FILE*) contactos) ){
+                // si el contacto a editar coincide con nuestro contador lo que se escribira en nuestro archivo temporal sera lo que se obtuvo de fgets
+                if (contContactos == contactoSeleccionado) {
+                    fputs(string, temp);
+                }
+                //en caso de que no, simplemente pasara la linea en la que se encuentra al archivo temporal
+                else{
+                    fputs(line, temp);
+                }
+                contContactos++;
+            }
+            fflush(temp);
+            fclose(contactos);
+            fclose(temp);
+            remove("contactos.txt");
+            rename("temp.txt", "contactos.txt");
+        }
+        else{
+            contactos = fopen("contactos.txt", "a");
+            fputs(string, contactos);
+            fclose(contactos);
+        }
+    }
+    else{
         FILE *temp;
+        contContactos=0;
         temp = fopen("temp.txt", "w+");
         contactos = fopen("contactos.txt", "r");
         while(fgets(line, 1024, (FILE*) contactos) ){
-			// si el contacto a editar coincide con nuestro contador lo que se escribira en nuestro archivo temporal sera lo que se obtuvo de fgets
-			if (contContactos == contactoSeleccionado) {
-			    fputs(string, temp);
-			}
-			//en caso de que no, simplemente pasara la linea en la que se encuentra al archivo temporal
-			else{
-				fputs(line, temp);
-			}
-		    contContactos++;
-		}
+            // si el contacto a eliminar coincide con el contacto que se esta leyendo, no se agrega al archivo temporal
+            if (contContactos != contactoSeleccionado) {
+                fputs(line, temp);
+            }
+            contContactos++;
+        }
         fflush(temp);
-	    fclose(contactos);
-	    fclose(temp);
+        fclose(contactos);
+        fclose(temp);
         remove("contactos.txt");
-	    rename("temp.txt", "contactos.txt");
+        rename("temp.txt", "contactos.txt");
     }
-    else{
-        contactos = fopen("contactos.txt", "a");
-        fputs(string, contactos);
-	    fclose(contactos);
-    }
-    
 }
 //Imprime las opciones disponibles dentro del menu de Altas Bajas y Cambios, si la opcion esta seleccionada, se imprimira de un color diferente
 void imprimir_menu_abc(int opcionSeleccionada){
@@ -483,13 +538,13 @@ void imprimir_menu_principal(int opcionSeleccionada){
         //Cambio de color si la opcion esta seleccionada
         if(opcionSeleccionada == totalOpcMenuPrin-2){color(13);} else{color(7);}
         imprimir_recuadro(x_centrada(20), 12, x_centrada(20)+19, 14);
-        posicion_cursor(x_centrada(8), 13);
-        printf("Opci%cn 2", 162);
+        posicion_cursor(x_centrada(11), 13);
+        printf("Cambiar PIN");
         //Cambio de color si la opcion esta seleccionada
         if(opcionSeleccionada == totalOpcMenuPrin-1){color(13);} else{color(7);}
         imprimir_recuadro(x_centrada(20), 16, x_centrada(20)+19, 18);
-        posicion_cursor(x_centrada(8), 17);
-        printf("Opci%cn 3", 162);
+        posicion_cursor(x_centrada(13), 17);
+        printf("Recuperar PIN", 162);
     }
     else{
         y=12;
@@ -505,16 +560,15 @@ void imprimir_menu_principal(int opcionSeleccionada){
     printf("Salir del programa");
 }
 //Funcion que lee le un pin que ingrese el usuario, en caso de no cumplir con las caracteristicas requeridas, se le pedira de nuevo.
-void crear_pin(){
+void crear_pin(int opcion){
     int i, j, error=0;
-    char pinUsuario[5], pinEncriptado[2000];
-    FILE *pinArchivo;
+    char pinUsuario[5], pinEncriptado[1024], aux[1024], pregunta[1024], respuesta[1024], line[2048];
+    FILE *pinArchivo, *preguntaArchivo;
     system("cls");
     //Do-While para volver a pedir el pin en caso que no cumpla con la extension pedida
     do{
         error=0;
         color(13);
-        
         posicion_cursor(x_centrada(66), 7); printf("Ingresa PIN con el que vas a proteger tus contactos (de 4 digitos):");
         color(7);
         fflush(stdin);
@@ -553,8 +607,34 @@ void crear_pin(){
     fputs(pinEncriptado, pinArchivo);
     fclose(pinArchivo);
 
-    posicion_cursor(x_centrada(21), 7); printf("PIN Creado con exito!");
-    posicion_cursor(x_centrada(56), 9); printf("Pulsa cualquier tecla para regresar al menu principal...");
+    if(opcion == 0){
+        line[0]='\0';
+        system("cls");
+        preguntaArchivo = fopen("pregunta.txt", "w+");
+        color(13);
+        posicion_cursor(4, 7); printf("Ingresa la pregunta de seguridad: ");
+        color(7);
+        gets(aux);
+        encrypt(aux, pregunta);
+        strcat(line, pregunta);
+        strcat(line, ";");
+
+        color(13);
+        posicion_cursor(4, 8); printf("Ingresa su respuesta: ");
+        color(7);
+        gets(aux);
+        encrypt(aux, respuesta);
+        strcat(line, respuesta);
+        fputs(line, preguntaArchivo);
+        system("cls");
+        color(2);
+        posicion_cursor(x_centrada(42), 7); printf("Pregunta de seguridad ingresada con exito!");
+        fclose(preguntaArchivo);
+    }
+    color(2);
+    posicion_cursor(x_centrada(21), 8); printf("PIN Creado con exito!");
+    posicion_cursor(x_centrada(56), 10); printf("Pulsa cualquier tecla para regresar al menu principal...");
+    printf("%s", line);
     getch();
 }
 
@@ -610,7 +690,7 @@ int iniciar_sesion(){
         fallo=0;
         system("cls");
         color(13);
-        posicion_cursor(x_centrada(5), 7); printf("Ingresa tu PIN:");
+        posicion_cursor(x_centrada(15), 7); printf("Ingresa tu PIN:");
         color(7);
         imprimir_recuadro(x_centrada(8), 9, x_centrada(8)+7, 11);
         posicion_cursor(x_centrada(4), 10);
@@ -640,15 +720,60 @@ int iniciar_sesion(){
 
     return sesion;
 }
+int cambiar_pin(){
+    char pinIngresado[5], pinPrograma[100];
+    int intentos=4, fallo, i=0, c, stop;
+    FILE *pinArchivo;
+    pinArchivo = fopen("pin.txt", "r");
+    while (c != EOF){
+        c = fgetc(pinArchivo);
+        pinPrograma[i] = (char)c;
+        i++;
+    }
+    pinPrograma[i]='\0';
+    fclose(pinArchivo);
+    do{
+        fallo=0;
+        system("cls");
+        color(13);
+        posicion_cursor(x_centrada(24), 7); printf("Ingresa tu PIN anterior:");
+        color(7);
+        imprimir_recuadro(x_centrada(8), 9, x_centrada(8)+7, 11);
+        posicion_cursor(x_centrada(4), 10);
+        gets(pinIngresado);
+        if(!compare(pinIngresado, pinPrograma)){
+            color(4);
+            intentos--;
+            posicion_cursor(x_centrada(66), 13); printf("El PIN ingresado no coincide con el anterior! Te quedan %d intentos", intentos);
+            posicion_cursor(x_centrada(49), 14); printf("Pulsa cualquier tecla para intentarlo de nuevo...");
+            getch();
+            fallo=1;
+        }
+        else{
+            crear_pin(1);
+            fallo=0;
+        }
+    }
+    while(intentos > 0 && fallo == 1);
+    if(intentos == 0){
+        posicion_cursor(x_centrada(30), 16); printf("Has fallado todos los intentos");
+        stop=0;
+        getch();
+    }
+    else{
+        stop=1;
+    }
 
+    return stop;
+}
 //Funcion que ejecuta la opcion seleccionada del menu principal, dependiendo si hay o no un pin asignado
 //ENTRADA:
 //@opcion: es el numero de opcion que se ha seleccionado
 void ejecutar_opcion_menu_principal(int opcion){
-    int sesion = 0, opcionABC; 
+    int sesion = 0, opcionABC, error; 
     if(existePin != 1){
         if(opcion == 0){
-            crear_pin();
+            crear_pin(0);
         }
         else if (opcion == totalOpcMenuPrin){
             salida=1;
@@ -663,14 +788,23 @@ void ejecutar_opcion_menu_principal(int opcion){
                     opcionABC = menu_abc();
                     ejecutar_opcion_menu_abc(opcionABC);
                 }
-                while(salidaABC==0);
+                while(salidaABC!=1);
             }
             else{
                 exit(0);
             }
         }
         else if(opcion == totalOpcMenuPrin-2){
-            //print_pin();
+            error = cambiar_pin();
+            if(error == 0){
+                salida=1;
+            }
+            else{
+                salida=0;
+            }
+        }
+        else if(opcion == totalOpcMenuPrin-1){
+            //error = recuperar_pin();
         }
         else if (opcion == totalOpcMenuPrin){
             salida=1;
@@ -691,6 +825,27 @@ void esconder_cursor()
 //funcion para cambiar de color el texto
 //ENTRADA:
 //@color: es el codigo del color que se quiere
+
+/*
+0	black
+1	blue
+2	green
+3	cyan
+4	red
+5	magenta
+6	yellow/brown
+7	white
+8	gray
+9	bright blue
+10	bright green
+11	bright cyan
+12	bright red
+13	bright magenta
+14	bright yellow
+15	white
+
+*/
+
 void color(char color){
 	HANDLE cambioDeColor;
 	cambioDeColor = GetStdHandle(STD_OUTPUT_HANDLE);
