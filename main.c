@@ -42,6 +42,7 @@ void crear_pin();
 void verificar_pin(int statusPin);
 int iniciar_sesion();
 int cambiar_pin();
+int recuperar_pin();
 
 //FUNCIONES MENU ABC
 int menu_abc();
@@ -611,7 +612,7 @@ void crear_pin(int opcion){
         line[0]='\0';
         system("cls");
         preguntaArchivo = fopen("pregunta.txt", "w+");
-        color(13);
+        color(3);
         posicion_cursor(4, 7); printf("Ingresa la pregunta de seguridad: ");
         color(7);
         gets(aux);
@@ -619,7 +620,7 @@ void crear_pin(int opcion){
         strcat(line, pregunta);
         strcat(line, ";");
 
-        color(13);
+        color(3);
         posicion_cursor(4, 8); printf("Ingresa su respuesta: ");
         color(7);
         gets(aux);
@@ -766,6 +767,60 @@ int cambiar_pin(){
 
     return stop;
 }
+int recuperar_pin(){
+    char aux[1024], pregunta[1024], respuesta[1024], respUsuario[1024];
+    int i=0, c, j=0, stop, intentos=4, fallo = 0;
+    FILE *preguntaArchivo;
+    preguntaArchivo = fopen("pregunta.txt", "r");
+    while (c != EOF){
+        c = fgetc(preguntaArchivo);
+        aux[i] = (char)c;
+        i++;
+    }
+    aux[i+1]='\0';
+
+    char *ptr, *rest; 
+    rest = aux;
+
+	while ((ptr = strtok_r(rest, ";", &rest))){
+        if(j==0){
+            decrypt(ptr, pregunta);
+        }
+        else{
+            strcpy(respuesta, ptr);
+        }
+        j++;
+    }
+    
+    do{
+        system("cls");
+        posicion_cursor(6, 5);
+        color(3);
+        printf("Pregunta de seguridad -> %s: ", pregunta);
+        color(7);
+        gets(respUsuario);
+        if(compare(respUsuario, respuesta) == 1){
+            crear_pin(1);
+            fallo = 0;
+        }
+        else{
+            color(4);
+            intentos--;
+            posicion_cursor(x_centrada(50), 7); printf("La respuesta no es correcta, te quedan %d intentos.", intentos);
+            posicion_cursor(x_centrada(49), 7); printf("Pulsa cualquier tecla para continuar...");
+        }
+    }
+    while(intentos > 0 && fallo == 1);
+    if(intentos == 0){
+        color(4);
+        posicion_cursor(x_centrada(30), 16); printf("Has fallado todos los intentos");
+        stop=0;
+        getch();
+    }
+    else{
+        stop=1;
+    }    
+}
 //Funcion que ejecuta la opcion seleccionada del menu principal, dependiendo si hay o no un pin asignado
 //ENTRADA:
 //@opcion: es el numero de opcion que se ha seleccionado
@@ -804,7 +859,7 @@ void ejecutar_opcion_menu_principal(int opcion){
             }
         }
         else if(opcion == totalOpcMenuPrin-1){
-            //error = recuperar_pin();
+            recuperar_pin();
         }
         else if (opcion == totalOpcMenuPrin){
             salida=1;
