@@ -152,39 +152,45 @@ void imprimir_contactos(int contactoSeleccionado, int contactosTotal){
         char direccion[256];
     }
     contactos[contactosTotal];
-    char line[2048], dataEncrypt[256];
+
+    char line[2048], dataEncrypted[256], dataDecrypted[256];
+    char *ptr, *rest; 
 
     FILE *contactosArchivo;
+    j=0;
     contactosArchivo = fopen("contactos.txt", "r");
     while(fgets(line, 2048, contactosArchivo) != NULL){
-        j=0;
         line[strlen(line)-1] = '\0';
-        char* ptr; 
-        char* rest = line; 
-  
+        rest = line;
         datoCont = 1;
 		while ((ptr = strtok_r(rest, ";", &rest))){
-            if(strlen(ptr) > 0){
-                tronoLong = strlen(ptr);
+
+            
+            strcpy(dataEncrypted, ptr);
+
+            decrypt(dataEncrypted, dataDecrypted);
+
+            if(strlen(dataDecrypted) > tronoLong){
+                tronoLong = strlen(dataDecrypted);
             }
             switch(datoCont){
                 case 1:
-                    decrypt(ptr, contactos[j].nombre);
+                    strcpy(contactos[j].nombre,dataDecrypted);
                     // printf("%s\n", contactos[j].nombre);
                     datoCont++;
                     break;
                 case 2:
-                    decrypt(ptr, contactos[j].tel);
+                    strcpy(contactos[j].tel,dataDecrypted);
                     // printf("%s\n", contactos[j].tel);
                     datoCont++;
                     break;
                 case 3:
-                    decrypt(ptr, contactos[j].correo);
+                    strcpy(contactos[j].correo,dataDecrypted);
                     // printf("%s\n", contactos[j].correo);
                     datoCont++;
                     break;
                 case 4:
-                    decrypt(ptr, contactos[j].direccion);
+                    strcpy(contactos[j].direccion,dataDecrypted);
                     // printf("%s\n", contactos[j].direccion);
                     datoCont++;
                     break;
@@ -192,16 +198,8 @@ void imprimir_contactos(int contactoSeleccionado, int contactosTotal){
 		}
         j++;
     }
-    for (i = 0; i < contactosTotal; i++) {
-        printf("contacto%d: \n", i);
-        printf("%s\n", contactos[i].nombre);
-        printf("%s\n", contactos[i].tel);
-        printf("%s\n", contactos[i].correo);
-        printf("%s\n", contactos[i].direccion);
-    }
 
     fclose(contactosArchivo);
-    system("pause");
     for (i = 0; i < contactosTotal; i++) {
         if(i==contactoSeleccionado){
             color(6);
@@ -209,7 +207,6 @@ void imprimir_contactos(int contactoSeleccionado, int contactosTotal){
         else{
             color(7);
         }
-        posicion_cursor(x_centrada(tronoLong+4), i+ajuste);
         imprimir_recuadro(x_centrada(tronoLong+4), i+ajuste, x_centrada(tronoLong+4)+tronoLong+3, i+ajuste+7);
         posicion_cursor(x_centrada( strlen(contactos[i].nombre) ), i+ajuste+2); printf("%s", contactos[i].nombre);
         posicion_cursor(x_centrada( strlen(contactos[i].tel) ), i+ajuste+3); printf("%s", contactos[i].tel);
