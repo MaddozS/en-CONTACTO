@@ -635,7 +635,6 @@ void crear_pin(int opcion){
     color(2);
     posicion_cursor(x_centrada(21), 8); printf("PIN Creado con exito!");
     posicion_cursor(x_centrada(56), 10); printf("Pulsa cualquier tecla para regresar al menu principal...");
-    printf("%s", line);
     getch();
 }
 
